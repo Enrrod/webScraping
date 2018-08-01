@@ -35,7 +35,7 @@ def firstSearches(search):
     df.to_csv('/home/enrique/Documentos/Busqueda automatica/links_' + date + '_' + hour + '.csv')
 
 
-def firstScholarSearches(search):
+def firstScholarSearches(search, mandatoryWords):
     hour = time.strftime("%H:%M:%S")
     date = time.strftime("%d/%m/%y")
     date = date.replace('/','-')
@@ -57,13 +57,21 @@ def firstScholarSearches(search):
 
     scraped_data = []
     for search_result in search_results:
+        k = 0
         title = search_result.text.encode('utf8')
-        link = search_result["href"]
-        scraped_data.append((title, link))
+        for mw in mandatoryWords:
+            if mw in title:
+                k = k + 1
+        if k == len(mandatoryWords):
+            link = search_result["href"]
+            scraped_data.append((title, link))
 
-    df = pd.DataFrame(data=scraped_data, columns=["Title", "Link"])
-    df.to_csv('/home/enrique/Documentos/Busqueda automatica/linksScholar_'+ query + '_' + date + '_' + hour + '.csv')
-
+    if len(scraped_data) == 0:
+        print 'No matches for this search'
+    else:
+        df = pd.DataFrame(data=scraped_data, columns=["Title", "Link"])
+        df.to_csv('/home/enrique/Documentos/Busqueda automatica/linksScholar_'+ query + '_' + date + '_' + hour + '.csv')
+        print 'Links saved correctly'
 
 if __name__=="__main__":
-    firstScholarSearches('field theories of mind')
+    firstScholarSearches('field theories of mind', ['field'])
